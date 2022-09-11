@@ -1,18 +1,32 @@
 import React from 'react'
-import { hydrateRoot } from 'react-dom/client'
+import { hydrateRoot, createRoot } from 'react-dom/client'
 import { PageShell } from './PageShell'
 import type { PageContextClient } from './types'
 
 export { render }
+export const clientRouting = true
 
+let root: any
 async function render(pageContext: PageContextClient) {
   const { Page, pageProps } = pageContext
-  hydrateRoot(
-    document.getElementById('page-view')!,
+
+  const page = (
     <PageShell pageContext={pageContext}>
       <Page {...pageProps} />
     </PageShell>
   )
+
+  const container = document.getElementById('page-view')!
+  // SPA
+  if (container.innerHTML === '' || !pageContext.isHydration) {
+    if (!root) {
+      root = createRoot(container)
+    }
+    root.render(page)
+    // SSR
+  } else {
+    root = hydrateRoot(container, page)
+  }
 }
 
 /* To enable Client-side Routing:

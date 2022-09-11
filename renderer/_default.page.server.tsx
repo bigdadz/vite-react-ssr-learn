@@ -11,11 +11,19 @@ export const passToClient = ['pageProps', 'urlPathname']
 
 async function render(pageContext: PageContextServer) {
   const { Page, pageProps } = pageContext
-  const pageHtml = ReactDOMServer.renderToString(
-    <PageShell pageContext={pageContext}>
-      <Page {...pageProps} />
-    </PageShell>
-  )
+  let pageHtml
+  if (!pageContext.Page) {
+    // SPA
+    pageHtml = ''
+  } else {
+    // SSR / HTML-only
+    pageHtml = ReactDOMServer.renderToString(
+      <PageShell pageContext={pageContext}>
+        <Page {...pageProps} />
+      </PageShell>
+    )
+  }
+  
 
   // See https://vite-plugin-ssr.com/head
   const { documentProps } = pageContext.exports
